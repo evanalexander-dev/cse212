@@ -11,24 +11,75 @@ public class CustomerService {
         // Test Cases
 
         // Test 1
-        // Scenario: 
-        // Expected Result: 
+        // Scenario: Check Queue sizing
+        // Expected Result: size <= 0 means queue is size 10, and if size > 0 then queue should be provided size
         Console.WriteLine("Test 1");
 
-        // Defect(s) Found: 
+        var csInvalidSize1 = new CustomerService(0);
+        var csInvalidSize2 = new CustomerService(-1);
+        var csInvalidSize3 = new CustomerService(-16);
+
+        Console.WriteLine($"Invalid 1 (0): {csInvalidSize1}");
+        Console.WriteLine($"Invalid 2 (-1): {csInvalidSize2}");
+        Console.WriteLine($"Invalid 3 (-16): {csInvalidSize3}");
+
+        var csSize1 = new CustomerService(3);
+        var csSize2 = new CustomerService(12);
+        var csSize3 = new CustomerService(16);
+
+        Console.WriteLine($"Valid 1 (3): {csSize1}");
+        Console.WriteLine($"Valid 2 (12): {csSize2}");
+        Console.WriteLine($"Valid 3 (16): {csSize3}");
+
+        // Defect(s) Found: N/A
 
         Console.WriteLine("=================");
 
         // Test 2
-        // Scenario: 
-        // Expected Result: 
+        // Scenario: add customer to the queue, and then serve them
+        // Expected Result: Customer gets added, then removed and returned correctly
         Console.WriteLine("Test 2");
 
-        // Defect(s) Found: 
+        var cs1Customer = new CustomerService(1);
+        cs1Customer.AddNewCustomer();
+        cs1Customer.ServeCustomer();
+
+        // Defect(s) Found: ServeCustomer needs to remove from the queue AFTER getting the value
 
         Console.WriteLine("=================");
 
-        // Add more Test Cases As Needed Below
+        // Test 3
+        // Scenario: Queue is already full when adding another customer
+        // Expected Result: error message is displayed
+        Console.WriteLine("Test 3");
+
+        var csFull = new CustomerService(3);
+        csFull.AddNewCustomer();
+        csFull.AddNewCustomer();
+        csFull.AddNewCustomer();
+        csFull.AddNewCustomer();
+
+        // Defect(s) Found: AddNewCustomer needs >= instead of just >
+
+        Console.WriteLine("=================");
+
+        // Test 4
+        // Scenario: Queue is empty, and trying to serve another customer (as well as making sure the queue is the right order)
+        // Expected Result: Error message is displayed. Order is correct
+        Console.WriteLine("Test 4");
+
+        var csEmpty = new CustomerService(3);
+        csEmpty.AddNewCustomer();
+        csEmpty.AddNewCustomer();
+        csEmpty.AddNewCustomer();
+        csEmpty.ServeCustomer();
+        csEmpty.ServeCustomer();
+        csEmpty.ServeCustomer();
+        csEmpty.ServeCustomer();
+
+        // Defect(s) Found: Needs to check length and display a proper error message
+
+        Console.WriteLine("=================");
     }
 
     private readonly List<Customer> _queue = new();
@@ -67,7 +118,7 @@ public class CustomerService {
     /// </summary>
     private void AddNewCustomer() {
         // Verify there is room in the service queue
-        if (_queue.Count > _maxSize) {
+        if (_queue.Count >= _maxSize) {
             Console.WriteLine("Maximum Number of Customers in Queue.");
             return;
         }
@@ -88,8 +139,12 @@ public class CustomerService {
     /// Dequeue the next customer and display the information.
     /// </summary>
     private void ServeCustomer() {
-        _queue.RemoveAt(0);
+        if (_queue.Count == 0) {
+            Console.WriteLine("No Customers Available.");
+            return;
+        }
         var customer = _queue[0];
+        _queue.RemoveAt(0);
         Console.WriteLine(customer);
     }
 
