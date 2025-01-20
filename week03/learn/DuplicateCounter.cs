@@ -22,9 +22,7 @@
         Console.WriteLine($"Number of duplicates : {CountDuplicates(data)}");
     }
 
-    private static int CountDuplicates(int[] data)
-    {
-        // Add code here.
-        return 0;
+    private static int CountDuplicates(int[] data) {
+        return data.Length - data.ToHashSet().Count;
     }
 }
