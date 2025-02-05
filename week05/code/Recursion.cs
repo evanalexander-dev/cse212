@@ -14,8 +14,9 @@ public static class Recursion
     /// </summary>
     public static int SumSquaresRecursive(int n)
     {
-        // TODO Start Problem 1
-        return 0;
+        if (n <= 0) return 0;
+        
+        return n * n + SumSquaresRecursive(n - 1);
     }
 
     /// <summary>
@@ -39,7 +40,14 @@ public static class Recursion
     /// </summary>
     public static void PermutationsChoose(List<string> results, string letters, int size, string word = "")
     {
-        // TODO Start Problem 2
+        if (size == 0) {
+            results.Add(word);
+            return;
+        }
+
+        for (int i = 0; i < letters.Length; i++) {
+            PermutationsChoose(results, string.Concat(letters.AsSpan(0, i), letters.AsSpan(i + 1)), size - 1, word + letters[i]);
+        }
     }
 
     /// <summary>
@@ -86,20 +94,28 @@ public static class Recursion
     /// </summary>
     public static decimal CountWaysToClimb(int s, Dictionary<int, decimal>? remember = null)
     {
-        // Base Cases
-        if (s == 0)
-            return 0;
-        if (s == 1)
-            return 1;
-        if (s == 2)
-            return 2;
-        if (s == 3)
-            return 4;
+        if (remember == null)
+            remember = new Dictionary<int, decimal>();
 
-        // TODO Start Problem 3
+        if (remember.ContainsKey(s))
+            return remember[s];
 
-        // Solve using recursion
-        decimal ways = CountWaysToClimb(s - 1) + CountWaysToClimb(s - 2) + CountWaysToClimb(s - 3);
+        decimal ways;
+
+        if (s <= 3)
+            ways = s switch
+            {
+                0 => 0,
+                1 => 1,
+                2 => 2,
+                3 => 4,
+                _ => throw new ArgumentOutOfRangeException(nameof(s)),
+            };
+        else
+            ways = CountWaysToClimb(s - 1, remember) + CountWaysToClimb(s - 2, remember) + CountWaysToClimb(s - 3, remember);
+
+        remember[s] = ways;
+
         return ways;
     }
 
@@ -118,7 +134,18 @@ public static class Recursion
     /// </summary>
     public static void WildcardBinary(string pattern, List<string> results)
     {
-        // TODO Start Problem 4
+        int starIndex = pattern.IndexOf('*');
+        if (starIndex == -1)
+        {
+            results.Add(pattern);
+            return;
+        }
+
+        string pattern0 = pattern[..starIndex] + "0" + pattern[(starIndex + 1)..];
+        WildcardBinary(pattern0, results);
+
+        string pattern1 = pattern[..starIndex] + "1" + pattern[(starIndex + 1)..];
+        WildcardBinary(pattern1, results);
     }
 
     /// <summary>
@@ -127,17 +154,37 @@ public static class Recursion
     /// </summary>
     public static void SolveMaze(List<string> results, Maze maze, int x = 0, int y = 0, List<ValueTuple<int, int>>? currPath = null)
     {
-        // If this is the first time running the function, then we need
-        // to initialize the currPath list.
-        if (currPath == null) {
+        if (currPath == null)
             currPath = new List<ValueTuple<int, int>>();
+
+        currPath.Add((x, y));
+
+        if (maze.IsEnd(x, y))
+        {
+            results.Add(currPath.AsString());
+            currPath.RemoveAt(currPath.Count - 1);
+            return;
         }
-        
-        // currPath.Add((1,2)); // Use this syntax to add to the current path
 
-        // TODO Start Problem 5
-        // ADD CODE HERE
+        var directions = new (int dx, int dy)[]
+        {
+            (1, 0),   // right
+            (0, 1),   // down
+            (-1, 0),  // left
+            (0, -1)   // up
+        };
 
-        // results.Add(currPath.AsString()); // Use this to add your path to the results array keeping track of complete maze solutions when you find the solution.
+        foreach (var (dx, dy) in directions)
+        {
+            int newX = x + dx;
+            int newY = y + dy;
+
+            if (maze.IsValidMove(currPath, newX, newY))
+            {
+                SolveMaze(results, maze, newX, newY, currPath);
+            }
+        }
+
+        currPath.RemoveAt(currPath.Count - 1);
     }
 }
